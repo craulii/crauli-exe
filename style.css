@@ -1,0 +1,1601 @@
+/*
+ * ============================================================
+ * CRAULI.EXE — STYLE.CSS
+ * ============================================================
+ * Layer stack (bottom to top):
+ *  1. CSS custom properties (variables)
+ *  2. Base reset & body
+ *  3. CRT scanlines overlay (body::before)
+ *  4. Noise/grain overlay (body::after)
+ *  5. Typography
+ *  6. Keyframe animations
+ *  7. Entry screen
+ *  8. Fixed UI elements (audio, counter)
+ *  9. Floating photos layer
+ * 10. Header
+ * 11. Navigation
+ * 12. Section base styles
+ * 13. About section
+ * 14. Ruleta Rusa
+ * 15. TCG Gallery
+ * 16. Guestbook
+ * 17. Footer
+ * 18. Easter egg overlays
+ * 19. Scrollbar styling
+ * 20. Utility classes
+ * 21. Responsive overrides
+ * ============================================================
+ */
+
+
+/* ============================================================
+   1. CSS CUSTOM PROPERTIES
+   ============================================================ */
+:root {
+  /* Color palette — all site colors defined here */
+  --color-bg:          #0a0a0a;   /* near-black background */
+  --color-bg-mid:      #111111;   /* slightly lighter panels */
+  --color-bg-card:     #0f0f0f;   /* card/element backgrounds */
+  --color-red:         #c0392b;   /* primary accent: Memphis red */
+  --color-red-bright:  #e74c3c;   /* hover/active red */
+  --color-red-dim:     #7b241c;   /* dim red for borders */
+  --color-purple:      #8e44ad;   /* secondary accent: occult purple */
+  --color-purple-bright: #9b59b6; /* lighter purple */
+  --color-green:       #00ff41;   /* matrix green for code/terminals */
+  --color-green-dim:   #00aa2a;   /* dim green */
+  --color-orange:      #ff6b00;   /* warning orange */
+  --color-text:        #d0d0d0;   /* base text: light grey (not white) */
+  --color-text-dim:    #888888;   /* secondary text */
+  --color-white:       #f0f0f0;   /* near-white */
+
+  /* TCG category colors */
+  --color-pokemon:     #f1c40f;   /* Pokémon yellow */
+  --color-onepiece:    #e74c3c;   /* One Piece red */
+  --color-magic:       #6c3483;   /* Magic purple */
+
+  /* Typography */
+  --font-pixel:        'VT323', 'Courier New', monospace;
+  --font-horror:       'Creepster', 'Impact', sans-serif;
+  --font-mono:         'Share Tech Mono', 'Courier New', monospace;
+
+  /* Spacing */
+  --section-padding:   4rem 2rem;
+  --card-radius:       0px;       /* intentionally zero — retro look */
+
+  /* Z-index layers */
+  --z-floating:        100;       /* floating photos */
+  --z-audio:           200;       /* audio control */
+  --z-counter:         200;       /* visit counter */
+  --z-entry:           500;       /* entry screen */
+  --z-easter:          600;       /* easter egg overlays */
+  --z-crt:             900;       /* CRT effects (must be on top) */
+
+  /* Animation timings */
+  --glitch-duration:   3s;
+  --flicker-duration:  8s;
+}
+
+
+/* ============================================================
+   2. BASE RESET & BODY
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 2rem;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  /* Screen flicker animation — simulates CRT power instability */
+  animation: screenFlicker var(--flicker-duration) infinite;
+  /* Slight vignette at edges for CRT feel */
+  box-shadow: inset 0 0 150px rgba(0,0,0,0.8);
+  cursor: crosshair; /* custom cursor: crosshair everywhere */
+}
+
+/* Interactive elements get a pointer */
+a, button, [role="button"], [tabindex] {
+  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><text y="16" font-size="16">☠</text></svg>') 10 10, pointer;
+}
+
+/* Selection color — blood red */
+::selection {
+  background: var(--color-red);
+  color: var(--color-bg);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: var(--color-red);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-red-bright);
+  text-decoration: underline;
+}
+
+
+/* ============================================================
+   3. CRT SCANLINES OVERLAY
+   Always on top of everything. Creates horizontal scan line bands.
+   pointer-events:none ensures it doesn't block interaction.
+   ============================================================ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;                       /* top:0 right:0 bottom:0 left:0 */
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.07) 2px,
+    rgba(0, 0, 0, 0.07) 4px
+  );
+  pointer-events: none;
+  z-index: var(--z-crt);
+  animation: scanlineScroll 12s linear infinite;
+}
+
+/* Subtle scanline drift animation */
+@keyframes scanlineScroll {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 100px; }
+}
+
+
+/* ============================================================
+   4. NOISE / GRAIN OVERLAY
+   SVG-based turbulence filter creates static noise effect.
+   ============================================================ */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  /* SVG noise filter inline */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: calc(var(--z-crt) - 1);
+  animation: noiseFlicker 0.15s steps(1) infinite;
+  opacity: 0.4;
+}
+
+@keyframes noiseFlicker {
+  0%   { transform: translate(0, 0); }
+  10%  { transform: translate(-1px, 1px); }
+  20%  { transform: translate(1px, -1px); }
+  30%  { transform: translate(-2px, 0); }
+  40%  { transform: translate(1px, 2px); }
+  50%  { transform: translate(0, -1px); }
+  60%  { transform: translate(2px, 1px); }
+  70%  { transform: translate(-1px, -2px); }
+  80%  { transform: translate(1px, 0); }
+  90%  { transform: translate(-1px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+
+
+/* ============================================================
+   5. TYPOGRAPHY
+   ============================================================ */
+h1, h2, h3 {
+  font-family: var(--font-pixel);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+h1 { font-size: clamp(2rem, 8vw, 5rem); }
+h2 { font-size: clamp(1.5rem, 5vw, 3rem); }
+h3 { font-size: clamp(1.1rem, 3vw, 1.8rem); }
+
+p {
+  margin-bottom: 1rem;
+}
+
+.highlight-red {
+  color: var(--color-red);
+  text-shadow: 0 0 10px var(--color-red);
+}
+
+.highlight-green {
+  color: var(--color-green);
+  text-shadow: 0 0 10px var(--color-green);
+}
+
+.quote-block {
+  border-left: 3px solid var(--color-purple);
+  padding-left: 1rem;
+  color: var(--color-purple-bright);
+  font-style: italic;
+  margin: 1rem 0;
+}
+
+
+/* ============================================================
+   6. KEYFRAME ANIMATIONS
+   ============================================================ */
+
+/* Screen flicker — whole body subtle opacity pulse */
+@keyframes screenFlicker {
+  0%   { opacity: 1; }
+  89%  { opacity: 1; }
+  90%  { opacity: 0.95; }
+  91%  { opacity: 0.4; }
+  92%  { opacity: 1; }
+  95%  { opacity: 1; }
+  96%  { opacity: 0.85; }
+  97%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+/* Glitch text — clip-path slice effect for .glitch class */
+@keyframes glitchTop {
+  0%   { clip-path: inset(0 0 95% 0); transform: translate(-3px, -2px); }
+  10%  { clip-path: inset(20% 0 75% 0); transform: translate(3px, 2px); }
+  20%  { clip-path: inset(40% 0 55% 0); transform: translate(-3px, 0); }
+  30%  { clip-path: inset(0 0 95% 0); transform: translate(0, 0); }
+  100% { clip-path: inset(0 0 95% 0); transform: translate(0, 0); }
+}
+
+@keyframes glitchBottom {
+  0%   { clip-path: inset(80% 0 0 0); transform: translate(3px, 2px); }
+  10%  { clip-path: inset(60% 0 20% 0); transform: translate(-3px, -2px); }
+  20%  { clip-path: inset(80% 0 0 0); transform: translate(3px, 0); }
+  30%  { clip-path: inset(80% 0 0 0); transform: translate(0, 0); }
+  100% { clip-path: inset(80% 0 0 0); transform: translate(0, 0); }
+}
+
+/* Color channel shift for RGB split effect */
+@keyframes rgbShift {
+  0%   { text-shadow: 2px 0 var(--color-red), -2px 0 var(--color-green); }
+  25%  { text-shadow: -2px 0 var(--color-red), 2px 0 var(--color-purple); }
+  50%  { text-shadow: 0 2px var(--color-red), 0 -2px var(--color-green); }
+  75%  { text-shadow: 2px 0 var(--color-purple), -2px 0 var(--color-green); }
+  100% { text-shadow: 2px 0 var(--color-red), -2px 0 var(--color-green); }
+}
+
+/* Pulse animation for entry screen elements */
+@keyframes pulse {
+  0%, 100% { text-shadow: 0 0 10px var(--color-red), 0 0 20px var(--color-red); }
+  50%       { text-shadow: 0 0 20px var(--color-red), 0 0 40px var(--color-red), 0 0 60px var(--color-red-dim); }
+}
+
+/* Shake animation — used for ruleta click and easter eggs */
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  10% { transform: translate(-4px, -2px) rotate(-1deg); }
+  20% { transform: translate(4px, 2px) rotate(1deg); }
+  30% { transform: translate(-3px, 3px) rotate(0); }
+  40% { transform: translate(3px, -3px) rotate(-1deg); }
+  50% { transform: translate(-4px, 0) rotate(1deg); }
+  60% { transform: translate(4px, 0) rotate(0); }
+  70% { transform: translate(0, 3px) rotate(-1deg); }
+  80% { transform: translate(0, -3px) rotate(1deg); }
+  90% { transform: translate(-2px, 2px) rotate(0); }
+}
+
+/* VHS color aberration */
+@keyframes vhsAberration {
+  0%   { filter: hue-rotate(0deg) saturate(1); }
+  25%  { filter: hue-rotate(5deg) saturate(1.1); }
+  50%  { filter: hue-rotate(-5deg) saturate(0.9); }
+  75%  { filter: hue-rotate(3deg) saturate(1.05); }
+  100% { filter: hue-rotate(0deg) saturate(1); }
+}
+
+/* Float animation for TCG cards on hover */
+@keyframes cardFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%       { transform: translateY(-8px) rotate(1deg); }
+}
+
+/* Glow pulse for buttons */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 5px var(--color-red), 0 0 10px var(--color-red-dim); }
+  50%       { box-shadow: 0 0 15px var(--color-red), 0 0 30px var(--color-red), 0 0 50px var(--color-red-dim); }
+}
+
+/* Scanline wipe for entry transition */
+@keyframes scanWipe {
+  0%   { clip-path: inset(0 0 100% 0); }
+  100% { clip-path: inset(0 0 0 0); }
+}
+
+/* Blink — old school cursor/text blink */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Entry screen background symbol drift */
+@keyframes symbolDrift {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0.15; }
+  50%  { transform: translateY(-20px) rotate(5deg); opacity: 0.25; }
+  100% { transform: translateY(0) rotate(0deg); opacity: 0.15; }
+}
+
+/* Intense glitch burst for easter eggs */
+@keyframes glitchBurst {
+  0%   { filter: invert(0) hue-rotate(0deg); transform: translate(0,0); }
+  10%  { filter: invert(1) hue-rotate(90deg); transform: translate(-5px, 5px); }
+  20%  { filter: invert(0) hue-rotate(180deg); transform: translate(5px, -5px); }
+  30%  { filter: invert(1) hue-rotate(270deg); transform: translate(-3px, -3px); }
+  40%  { filter: invert(0) hue-rotate(360deg); transform: translate(3px, 3px); }
+  50%  { filter: invert(1) hue-rotate(0deg); transform: translate(0, 0); }
+  60%  { filter: invert(0) hue-rotate(90deg); transform: translate(2px, -2px); }
+  70%  { filter: invert(1) hue-rotate(180deg); transform: translate(-2px, 2px); }
+  80%  { filter: invert(0) hue-rotate(270deg); transform: translate(0, 0); }
+  90%  { filter: invert(1) hue-rotate(360deg); transform: translate(-1px, 1px); }
+  100% { filter: invert(0) hue-rotate(0deg); transform: translate(0, 0); }
+}
+
+
+/* ============================================================
+   7. GLITCH TEXT CLASS
+   Applied to headings and nav items.
+   Uses ::before and ::after pseudo-elements for the slice effect.
+   data-text attribute must match the element's text content.
+   ============================================================ */
+.glitch {
+  position: relative;
+  color: var(--color-red);
+  animation: rgbShift var(--glitch-duration) infinite;
+}
+
+/* Top slice pseudo-element */
+.glitch::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  color: var(--color-green);
+  /* Chromatic aberration offset */
+  left: 2px;
+  text-shadow: -2px 0 var(--color-red);
+  animation: glitchTop var(--glitch-duration) infinite;
+  /* Only show at specific intervals — not always active */
+  animation-delay: 1s;
+}
+
+/* Bottom slice pseudo-element */
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  color: var(--color-purple);
+  left: -2px;
+  text-shadow: 2px 0 var(--color-green);
+  animation: glitchBottom var(--glitch-duration) infinite;
+  animation-delay: 0.5s;
+}
+
+
+/* Hover variant — intense glitch only on hover */
+.glitch-hover {
+  position: relative;
+  transition: color 0.1s;
+}
+
+.glitch-hover::before,
+.glitch-hover::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.glitch-hover:hover {
+  color: var(--color-red-bright);
+}
+
+.glitch-hover:hover::before {
+  opacity: 1;
+  color: var(--color-green);
+  left: 2px;
+  animation: glitchTop 0.3s infinite;
+}
+
+.glitch-hover:hover::after {
+  opacity: 1;
+  color: var(--color-purple);
+  left: -2px;
+  animation: glitchBottom 0.3s infinite;
+}
+
+/* Active glitch burst class — applied by JS for easter eggs */
+.is-glitching {
+  animation: glitchBurst 0.5s steps(1) !important;
+}
+
+
+/* ============================================================
+   8. ENTRY SCREEN
+   ============================================================ */
+#entry-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg);
+  z-index: var(--z-entry);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+/* Background floating symbols */
+.entry-bg-symbols {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.entry-bg-symbols span {
+  font-size: clamp(3rem, 8vw, 8rem);
+  color: var(--color-red-dim);
+  animation: symbolDrift 4s ease-in-out infinite;
+  display: block;
+}
+
+.entry-bg-symbols span:nth-child(2) { animation-delay: 0.5s; color: var(--color-purple); }
+.entry-bg-symbols span:nth-child(3) { animation-delay: 1s; }
+.entry-bg-symbols span:nth-child(4) { animation-delay: 1.5s; color: var(--color-purple); }
+.entry-bg-symbols span:nth-child(5) { animation-delay: 2s; }
+.entry-bg-symbols span:nth-child(6) { animation-delay: 2.5s; color: var(--color-purple); }
+.entry-bg-symbols span:nth-child(7) { animation-delay: 3s; }
+.entry-bg-symbols span:nth-child(8) { animation-delay: 3.5s; color: var(--color-purple); }
+
+/* ASCII border strips */
+.entry-ascii-border {
+  width: 100%;
+  color: var(--color-red-dim);
+  font-family: var(--font-pixel);
+  font-size: 1rem;
+  letter-spacing: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 0.5rem 0;
+}
+
+/* Main content stack */
+.entry-content {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+  width: 100%;
+}
+
+/* Big skull */
+.entry-skull {
+  font-size: clamp(4rem, 15vw, 8rem);
+  animation: pulse 2s ease-in-out infinite;
+  display: block;
+  margin-bottom: 1rem;
+  line-height: 1;
+}
+
+/* Entry glitch title */
+.entry-title {
+  font-family: var(--font-horror);
+  font-size: clamp(3rem, 12vw, 6rem);
+  color: var(--color-red);
+  margin-bottom: 1.5rem;
+  animation: pulse 2s ease-in-out infinite, rgbShift 3s infinite;
+}
+
+/* Warning text block */
+.entry-warning {
+  font-family: var(--font-pixel);
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  color: var(--color-text);
+  background: rgba(192, 57, 43, 0.1);
+  border: 1px solid var(--color-red-dim);
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  white-space: pre-line;
+  line-height: 1.8;
+}
+
+/* Year display */
+.entry-year {
+  font-family: var(--font-pixel);
+  color: var(--color-text-dim);
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  letter-spacing: 0.3em;
+}
+
+/* THE ENTER BUTTON */
+.enter-btn {
+  background: transparent;
+  border: 2px solid var(--color-red);
+  color: var(--color-red);
+  font-family: var(--font-pixel);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  padding: 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  transition: background 0.2s, color 0.2s, transform 0.1s;
+  animation: glowPulse 2s infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.enter-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.enter-btn:hover::before {
+  transform: scaleX(1);
+}
+
+.enter-btn:hover {
+  color: var(--color-bg);
+}
+
+.enter-btn-text {
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.2em;
+}
+
+.enter-btn-sub {
+  position: relative;
+  z-index: 1;
+  font-size: 0.9rem;
+  color: var(--color-text-dim);
+  letter-spacing: 0.1em;
+}
+
+.enter-btn:active {
+  transform: scale(0.97);
+}
+
+/* Disclaimer text */
+.entry-disclaimer {
+  font-family: var(--font-pixel);
+  color: var(--color-text-dim);
+  font-size: 0.8rem;
+  margin-top: 1.5rem;
+  letter-spacing: 0.1em;
+}
+
+/* Exit animation — applied by JS when entering site */
+.entry-screen--exiting {
+  animation: glitchBurst 0.3s steps(1);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   9. FIXED UI ELEMENTS
+   ============================================================ */
+
+/* Audio control — fixed top-right */
+#audio-control {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: var(--z-audio);
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid var(--color-red-dim);
+  padding: 0.4rem 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-pixel);
+  font-size: 1rem;
+}
+
+#audio-icon {
+  color: var(--color-red);
+  animation: blink 1s step-end infinite;
+}
+
+#audio-toggle {
+  background: transparent;
+  border: none;
+  color: var(--color-green);
+  font-family: var(--font-pixel);
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  transition: color 0.2s;
+}
+
+#audio-toggle:hover {
+  color: var(--color-red);
+}
+
+#audio-status {
+  color: var(--color-red);
+}
+
+#audio-status.is-on {
+  color: var(--color-green);
+  text-shadow: 0 0 8px var(--color-green);
+}
+
+
+/* Visit counter — fixed bottom-left */
+#visit-counter {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: var(--z-counter);
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid var(--color-red-dim);
+  padding: 0.4rem 0.8rem;
+  font-family: var(--font-pixel);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.counter-label {
+  color: var(--color-text-dim);
+}
+
+#counter-value {
+  color: var(--color-green);
+  text-shadow: 0 0 8px var(--color-green);
+  letter-spacing: 0.1em;
+  font-size: 1.2rem;
+}
+
+
+/* ============================================================
+   10. FLOATING PHOTOS LAYER
+   ============================================================ */
+#floating-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-floating);
+  pointer-events: none; /* layer itself doesn't block clicks */
+  overflow: hidden;
+}
+
+/* Individual floating photo */
+.floating-photo {
+  position: absolute;
+  width: clamp(80px, 10vw, 140px);
+  height: clamp(80px, 10vw, 140px);
+  object-fit: cover;
+  border: 2px solid var(--color-red);
+  box-shadow: 0 0 15px rgba(192, 57, 43, 0.6), 0 0 30px rgba(192, 57, 43, 0.2);
+  pointer-events: all; /* re-enable clicks on the images themselves */
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.1s;
+  filter: contrast(1.1) saturate(0.9);
+  /* VHS color drift */
+  animation: vhsAberration 6s ease-in-out infinite;
+}
+
+.floating-photo:hover {
+  border-color: var(--color-red-bright);
+  box-shadow: 0 0 25px rgba(231, 76, 60, 0.9), 0 0 50px rgba(231, 76, 60, 0.5);
+  z-index: 10;
+  animation: none;
+  filter: contrast(1.2) saturate(1.1);
+}
+
+.floating-photo:nth-child(odd) {
+  animation-delay: 2s;
+}
+
+.floating-photo:nth-child(3n) {
+  animation-delay: 4s;
+  border-color: var(--color-purple);
+  box-shadow: 0 0 15px rgba(142, 68, 173, 0.6);
+}
+
+
+/* ============================================================
+   11. HEADER
+   ============================================================ */
+#site-header {
+  background: linear-gradient(180deg, #000 0%, rgba(0,0,0,0.95) 100%);
+  border-bottom: 2px solid var(--color-red-dim);
+  padding: 2rem 2rem 1rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Static noise overlay for header */
+#site-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 100px,
+    rgba(192, 57, 43, 0.03) 100px,
+    rgba(192, 57, 43, 0.03) 101px
+  );
+  pointer-events: none;
+}
+
+/* Status bar at top of header */
+.header-statusbar {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-pixel);
+  font-size: 0.85rem;
+  color: var(--color-text-dim);
+  border-bottom: 1px solid var(--color-red-dim);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.1em;
+}
+
+/* Main site title */
+.site-title {
+  font-family: var(--font-horror);
+  font-size: clamp(3.5rem, 12vw, 8rem);
+  color: var(--color-red);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+/* Tagline */
+.site-tagline {
+  font-family: var(--font-pixel);
+  color: var(--color-purple);
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  letter-spacing: 0.2em;
+  margin-bottom: 1.5rem;
+}
+
+
+/* ============================================================
+   12. NAVIGATION
+   ============================================================ */
+.site-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 1rem 0;
+}
+
+.nav-link {
+  font-family: var(--font-pixel);
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  color: var(--color-text);
+  padding: 0.3rem 0.8rem;
+  letter-spacing: 0.15em;
+  border: 1px solid transparent;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--color-red);
+  border-color: var(--color-red-dim);
+  background: rgba(192, 57, 43, 0.1);
+  text-decoration: none;
+}
+
+.nav-sep {
+  color: var(--color-red-dim);
+  font-size: 1.2rem;
+  user-select: none;
+}
+
+
+/* ============================================================
+   13. SECTION BASE STYLES
+   ============================================================ */
+.section {
+  padding: var(--section-padding);
+  max-width: 1200px;
+  margin: 0 auto;
+  border-bottom: 1px solid rgba(192, 57, 43, 0.2);
+}
+
+.section-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.section-title {
+  color: var(--color-red);
+  margin-bottom: 1rem;
+}
+
+.section-divider {
+  font-family: var(--font-pixel);
+  color: var(--color-red-dim);
+  letter-spacing: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.section-subtitle {
+  font-family: var(--font-pixel);
+  color: var(--color-text-dim);
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  margin-top: 0.5rem;
+}
+
+
+/* ============================================================
+   14. ABOUT SECTION
+   ============================================================ */
+.about-container {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .about-container {
+    grid-template-columns: 1fr;
+  }
+  .about-sigil {
+    display: none; /* hide ASCII sigil on mobile */
+  }
+}
+
+/* ASCII sigil art */
+.about-sigil pre {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-purple);
+  line-height: 1.4;
+  text-shadow: 0 0 10px var(--color-purple);
+  border: 1px solid var(--color-purple);
+  padding: 0.5rem;
+  white-space: pre;
+}
+
+/* About text container */
+.about-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.about-intro {
+  font-size: 1.1rem;
+  color: var(--color-text);
+  margin-bottom: 1.5rem;
+}
+
+/* Individual content blocks */
+.about-block {
+  background: rgba(10, 10, 10, 0.8);
+  border-left: 3px solid var(--color-red-dim);
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.3s;
+}
+
+.about-block:hover {
+  border-color: var(--color-red);
+}
+
+.about-block-title {
+  font-family: var(--font-pixel);
+  font-size: 1.2rem;
+  color: var(--color-red);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.1em;
+}
+
+/* Stats table */
+.about-stats {
+  background: rgba(10, 10, 10, 0.8);
+  border-left: 3px solid var(--color-purple);
+  padding: 1rem 1.5rem;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.stats-table td {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid rgba(192, 57, 43, 0.15);
+}
+
+.stats-table td:first-child {
+  color: var(--color-text-dim);
+  width: 140px;
+  letter-spacing: 0.1em;
+}
+
+.stats-table td:last-child {
+  color: var(--color-green);
+}
+
+/* ============================================================
+   15. RULETA RUSA
+   ============================================================ */
+.ruleta-container {
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.ruleta-description {
+  font-family: var(--font-pixel);
+  font-size: 1.1rem;
+  color: var(--color-text-dim);
+  margin-bottom: 2rem;
+  letter-spacing: 0.1em;
+}
+
+/* Image wrapper — handles click and shake */
+.ruleta-image-wrap {
+  position: relative;
+  display: inline-block;
+  border: 3px solid var(--color-red);
+  box-shadow: 0 0 20px rgba(192, 57, 43, 0.5), 0 0 50px rgba(192, 57, 43, 0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.ruleta-image-wrap:hover {
+  box-shadow: 0 0 40px rgba(231, 76, 60, 0.8), 0 0 80px rgba(231, 76, 60, 0.4);
+  transform: scale(1.02);
+}
+
+/* Crosshair overlay */
+.ruleta-crosshair {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  font-size: 3rem;
+  color: rgba(192, 57, 43, 0.3);
+  pointer-events: none;
+  transition: color 0.3s;
+}
+
+.ruleta-image-wrap:hover .ruleta-crosshair {
+  color: rgba(231, 76, 60, 0.8);
+}
+
+/* The actual image */
+.ruleta-img {
+  max-width: 400px;
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: contrast(1.1) saturate(0.85);
+  transition: filter 0.3s;
+}
+
+.ruleta-image-wrap:hover .ruleta-img {
+  filter: contrast(1.2) saturate(1);
+}
+
+/* Overlay text */
+.ruleta-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  padding: 1rem;
+  z-index: 2;
+}
+
+.ruleta-label {
+  font-family: var(--font-pixel);
+  font-size: 1.2rem;
+  color: var(--color-red);
+  letter-spacing: 0.2em;
+  text-shadow: 0 0 10px var(--color-red);
+}
+
+/* Hint text below image */
+.ruleta-hint {
+  font-family: var(--font-pixel);
+  color: var(--color-text-dim);
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+}
+
+/* Shake when clicked — class added/removed by JS */
+.ruleta-image-wrap.is-shaking {
+  animation: shake 0.4s ease;
+}
+
+
+/* ============================================================
+   16. TCG GALLERY
+   ============================================================ */
+#tcg-gallery-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.gallery-loading {
+  font-family: var(--font-pixel);
+  color: var(--color-text-dim);
+  text-align: center;
+  font-size: 1.2rem;
+  animation: blink 1s step-end infinite;
+}
+
+/* Each TCG category block */
+.tcg-category {
+  position: relative;
+}
+
+/* Category header */
+.tcg-category-title {
+  font-family: var(--font-pixel);
+  font-size: 1.6rem;
+  letter-spacing: 0.15em;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+/* Color per category */
+.tcg-category[data-category="pokemon"] .tcg-category-title {
+  color: var(--color-pokemon);
+  border-color: var(--color-pokemon);
+  text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+}
+
+.tcg-category[data-category="onepiece"] .tcg-category-title {
+  color: var(--color-onepiece);
+  border-color: var(--color-onepiece);
+  text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+}
+
+.tcg-category[data-category="magic"] .tcg-category-title {
+  color: var(--color-magic);
+  border-color: var(--color-magic);
+  text-shadow: 0 0 10px rgba(108, 52, 131, 0.5);
+}
+
+/* Horizontal scroll track */
+.tcg-scroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 1rem 0;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+}
+
+.tcg-scroll:active {
+  cursor: grabbing;
+}
+
+/* Scroll track drag-to-scroll hint */
+.tcg-scroll::after {
+  content: '→ SCROLL →';
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  font-family: var(--font-pixel);
+  color: var(--color-text-dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  align-self: center;
+}
+
+/* Individual card figures */
+.tcg-card {
+  flex-shrink: 0;
+  width: clamp(120px, 15vw, 180px);
+  scroll-snap-align: start;
+  cursor: pointer;
+  transition: transform 0.3s, filter 0.3s;
+}
+
+.tcg-card:hover {
+  transform: translateY(-10px) rotate(2deg) scale(1.05);
+  animation: cardFloat 2s ease-in-out infinite;
+}
+
+.tcg-card img {
+  width: 100%;
+  height: clamp(160px, 20vw, 250px);
+  object-fit: cover;
+  border: 2px solid var(--color-red-dim);
+  transition: border-color 0.3s, box-shadow 0.3s;
+  filter: contrast(1.05) saturate(0.9);
+}
+
+.tcg-category[data-category="pokemon"] .tcg-card:hover img {
+  border-color: var(--color-pokemon);
+  box-shadow: 0 0 20px rgba(241, 196, 15, 0.6);
+}
+
+.tcg-category[data-category="onepiece"] .tcg-card:hover img {
+  border-color: var(--color-onepiece);
+  box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
+}
+
+.tcg-category[data-category="magic"] .tcg-card:hover img {
+  border-color: var(--color-magic);
+  box-shadow: 0 0 20px rgba(108, 52, 131, 0.6);
+}
+
+/* Card caption (filename as title) */
+.tcg-card figcaption {
+  font-family: var(--font-pixel);
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+  text-align: center;
+  padding: 0.4rem 0;
+  letter-spacing: 0.05em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Empty state when no cards configured */
+.tcg-empty {
+  font-family: var(--font-pixel);
+  color: var(--color-text-dim);
+  font-size: 0.9rem;
+  padding: 1rem;
+  border: 1px dashed var(--color-red-dim);
+  text-align: center;
+}
+
+
+/* ============================================================
+   17. GUESTBOOK
+   ============================================================ */
+.guestbook-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Form */
+.guestbook-form {
+  background: rgba(10, 10, 10, 0.8);
+  border: 1px solid var(--color-red-dim);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-label {
+  font-family: var(--font-pixel);
+  font-size: 1rem;
+  color: var(--color-red);
+  letter-spacing: 0.1em;
+}
+
+.form-input,
+.form-textarea {
+  background: var(--color-bg);
+  border: 1px solid var(--color-red-dim);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  padding: 0.6rem 0.8rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  resize: vertical;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  border-color: var(--color-red);
+  box-shadow: 0 0 8px rgba(192, 57, 43, 0.4);
+}
+
+.form-actions {
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+.form-submit {
+  background: transparent;
+  border: 1px solid var(--color-red);
+  color: var(--color-red);
+  font-family: var(--font-pixel);
+  font-size: 1.1rem;
+  padding: 0.5rem 1.5rem;
+  letter-spacing: 0.1em;
+  transition: background 0.2s, color 0.2s;
+}
+
+.form-submit:hover {
+  background: var(--color-red);
+  color: var(--color-bg);
+}
+
+.form-feedback {
+  font-family: var(--font-pixel);
+  font-size: 0.9rem;
+  color: var(--color-green);
+}
+
+.form-feedback.is-error {
+  color: var(--color-red);
+}
+
+/* Message list */
+.guestbook-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Individual guestbook post */
+.gb-post {
+  background: rgba(10, 10, 10, 0.6);
+  border-left: 3px solid var(--color-red-dim);
+  padding: 1rem 1.5rem;
+  transition: border-color 0.2s;
+}
+
+.gb-post:hover {
+  border-color: var(--color-red);
+}
+
+.gb-post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid rgba(192, 57, 43, 0.15);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.gb-author {
+  font-family: var(--font-pixel);
+  font-size: 1.1rem;
+  color: var(--color-red);
+  letter-spacing: 0.1em;
+}
+
+.gb-time {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+}
+
+.gb-body {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--color-text);
+  line-height: 1.6;
+  word-break: break-word;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+/* Empty state */
+.gb-empty {
+  font-family: var(--font-pixel);
+  color: var(--color-text-dim);
+  text-align: center;
+  padding: 2rem;
+  border: 1px dashed var(--color-red-dim);
+  font-size: 1rem;
+}
+
+
+/* ============================================================
+   18. FOOTER
+   ============================================================ */
+#site-footer {
+  border-top: 2px solid var(--color-red-dim);
+  text-align: center;
+  padding: 2rem;
+}
+
+.footer-content {
+  padding: 1.5rem 0;
+}
+
+.footer-copy {
+  font-family: var(--font-pixel);
+  color: var(--color-text-dim);
+  font-size: 1rem;
+  letter-spacing: 0.15em;
+}
+
+.footer-tech {
+  font-family: var(--font-pixel);
+  color: var(--color-red-dim);
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  margin-top: 0.5rem;
+}
+
+.footer-secret span {
+  font-size: 4px;
+  opacity: 0.1;
+  user-select: none;
+}
+
+.footer-ascii {
+  font-family: var(--font-pixel);
+  color: var(--color-red-dim);
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+
+/* ============================================================
+   19. EASTER EGG OVERLAYS
+   ============================================================ */
+.easter-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-easter);
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  /* Hidden by default */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+/* Shown state — toggled by JS */
+.easter-overlay.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+  animation: glitchBurst 0.5s steps(1);
+}
+
+.easter-konami-content,
+.easter-demon-content {
+  max-width: 500px;
+}
+
+.ascii-demon,
+.ascii-demon-big {
+  font-family: var(--font-mono);
+  color: var(--color-red);
+  text-shadow: 0 0 15px var(--color-red);
+  white-space: pre;
+  font-size: clamp(0.7rem, 2vw, 1rem);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.easter-close {
+  background: transparent;
+  border: 1px solid var(--color-red);
+  color: var(--color-red);
+  font-family: var(--font-pixel);
+  font-size: 1rem;
+  padding: 0.5rem 1.5rem;
+  letter-spacing: 0.1em;
+  margin-top: 1rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+.easter-close:hover {
+  background: var(--color-red);
+  color: var(--color-bg);
+}
+
+/* No Signal screen */
+.easter-nosignal {
+  background: #000;
+}
+
+.nosignal-text {
+  font-family: var(--font-horror);
+  font-size: clamp(3rem, 10vw, 8rem);
+  color: var(--color-text-dim);
+  animation: screenFlicker 0.3s infinite;
+  letter-spacing: 0.3em;
+}
+
+/* Colored noise bars */
+.nosignal-bars {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255,0,0,0.05),
+    rgba(255,0,0,0.05) 2px,
+    rgba(0,255,65,0.05) 2px,
+    rgba(0,255,65,0.05) 4px,
+    rgba(142,68,173,0.05) 4px,
+    rgba(142,68,173,0.05) 6px,
+    transparent 6px,
+    transparent 8px
+  );
+  animation: scanlineScroll 1s linear infinite;
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   20. SCROLLBAR STYLING
+   Dark theme scrollbars to match site aesthetic
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-red-dim);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-red);
+}
+
+/* Horizontal scrollbar for TCG carousels */
+.tcg-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tcg-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-red);
+}
+
+
+/* ============================================================
+   21. UTILITY CLASSES
+   ============================================================ */
+
+/* Screen-reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+
+/* Fade in utility */
+.fade-in {
+  animation: scanWipe 0.5s ease forwards;
+}
+
+/* Glow text utilities */
+.glow-red  { text-shadow: 0 0 10px var(--color-red), 0 0 20px var(--color-red-dim); }
+.glow-green { text-shadow: 0 0 10px var(--color-green); }
+.glow-purple { text-shadow: 0 0 10px var(--color-purple); }
+
+
+/* ============================================================
+   22. RESPONSIVE OVERRIDES
+   ============================================================ */
+@media (max-width: 768px) {
+  :root {
+    --section-padding: 2rem 1rem;
+  }
+
+  .header-statusbar {
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: 0.75rem;
+  }
+
+  .site-nav {
+    gap: 0.3rem;
+  }
+
+  .nav-link {
+    font-size: 0.9rem;
+  }
+
+  .about-container {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #audio-control {
+    font-size: 0.85rem;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  #visit-counter {
+    font-size: 0.85rem;
+    bottom: 0.5rem;
+    left: 0.5rem;
+  }
+
+  .gb-post-header {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .entry-bg-symbols span {
+    font-size: 2rem;
+  }
+
+  .floating-photo {
+    width: 60px;
+    height: 60px;
+  }
+}

@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V7
+.Trashes
+ehthumbs.db
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node (if ever needed)
+node_modules/
+.npm
+
+# Claude Code local config (not for deployment)
+.claude/
+
+# Environment files (never commit secrets)
+.env
+.env.local
+.env.*
+
+# Vercel
+.vercel/

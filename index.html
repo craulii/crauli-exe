@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                      CRAULI.EXE                              ║
+  ║  Cursed personal site · Est. 2026 · Memphis underground      ║
+  ║  Built with: hate, cerveza, Vanilla JS, and black magic      ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  ARCHITECTURE:
+  - This file defines structure only. All styles are in style.css
+  - All logic is in main.js. All settings are in config.js
+  - Load order: style.css → config.js → main.js (bottom of body)
+
+  SECTIONS:
+  1. #entry-screen   — Warning / gate overlay
+  2. #main-site      — The actual site (hidden until entry)
+     ├── #audio-control  (fixed, top-right)
+     ├── #visit-counter  (fixed, bottom-left)
+     ├── #floating-layer (fixed, full viewport, photos bounce here)
+     ├── header
+     ├── #about
+     ├── #ruleta
+     ├── #tcg-gallery
+     └── #guestbook
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Crauli.exe — Agente del caos digital. Thelema, magia oscura, TCG y cervezas.">
+  <meta name="robots" content="noindex"> <!-- keep this cursed domain underground -->
+
+  <title>CRAULI.EXE — ENTER IF YOU DARE</title>
+
+  <!-- Pixel/horror fonts from Google Fonts CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Creepster&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <!-- Main stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Favicon: pentagram via emoji fallback -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☠</text></svg>">
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 1: ENTRY SCREEN
+       Full-viewport overlay. Disappears when user clicks ENTER.
+       The JS module EntryScreen handles the transition logic.
+  ══════════════════════════════════════════════════════════ -->
+  <div id="entry-screen" role="dialog" aria-modal="true" aria-labelledby="entry-title">
+
+    <!-- Animated background skulls (CSS-positioned, decorative) -->
+    <div class="entry-bg-symbols" aria-hidden="true">
+      <span>☠</span><span>✡</span><span>☠</span><span>⛧</span>
+      <span>☠</span><span>✡</span><span>☠</span><span>⛧</span>
+    </div>
+
+    <!-- ASCII border top -->
+    <div class="entry-ascii-border" aria-hidden="true">
+      ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+    </div>
+
+    <div class="entry-content">
+      <!-- Main skull icon -->
+      <div class="entry-skull" aria-hidden="true">☠</div>
+
+      <!-- Warning title — ID used by aria-labelledby -->
+      <h1 id="entry-title" class="entry-title glitch" data-text="CRAULI.EXE">CRAULI.EXE</h1>
+
+      <!-- Warning body text — filled from CONFIG.warningText by JS -->
+      <div id="entry-warning-text" class="entry-warning"></div>
+
+      <!-- Year display, retro style -->
+      <div class="entry-year" aria-hidden="true">
+        <span>MMXXVI</span> · <span>v6.6.6</span>
+      </div>
+
+      <!-- The gate — this is the only interactive element -->
+      <button id="enter-btn" class="enter-btn" type="button">
+        <span class="enter-btn-text">[ ENTER.EXE ]</span>
+        <span class="enter-btn-sub">Haz clic para invocar el caos</span>
+      </button>
+
+      <!-- Footer disclaimer -->
+      <p class="entry-disclaimer" aria-hidden="true">
+        18+ · NSFW energy · No refunds · Void where prohibited by law
+      </p>
+    </div>
+
+    <!-- ASCII border bottom -->
+    <div class="entry-ascii-border" aria-hidden="true">
+      ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+    </div>
+
+  </div><!-- /#entry-screen -->
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 2: MAIN SITE
+       Hidden on load. Revealed by EntryScreen module.
+       style: display:none → toggled to display:block by JS
+  ══════════════════════════════════════════════════════════ -->
+  <div id="main-site" style="display:none" aria-hidden="true">
+
+    <!-- ── AUDIO CONTROL (fixed overlay) ─────────────────────
+         Position: fixed top-right
+         Managed by AudioControl module in main.js
+    ──────────────────────────────────────────────────────── -->
+    <div id="audio-control" title="Toggle background music">
+      <span id="audio-icon" aria-hidden="true">♪</span>
+      <button id="audio-toggle" type="button" aria-label="Toggle music">
+        MUSIC: <span id="audio-status">OFF</span>
+      </button>
+    </div>
+
+    <!-- ── VISIT COUNTER (fixed overlay) ─────────────────────
+         Position: fixed bottom-left
+         Managed by VisitCounter module in main.js
+    ──────────────────────────────────────────────────────── -->
+    <div id="visit-counter" title="Total visits tracked via localStorage">
+      <span class="counter-label">VISITAS:</span>
+      <span id="counter-value">000000</span>
+    </div>
+
+    <!-- ── FLOATING PHOTOS LAYER ─────────────────────────────
+         Position: fixed, full viewport, pointer-events managed per image
+         Images are injected here by FloatingPhotos module in main.js
+         Each image bounces like a DVD screensaver
+    ──────────────────────────────────────────────────────── -->
+    <div id="floating-layer" aria-hidden="true"></div>
+
+    <!-- ── EASTER EGG OVERLAYS ───────────────────────────────
+         Hidden by default. Revealed by EasterEggs module.
+    ──────────────────────────────────────────────────────── -->
+    <!-- Konami code reward -->
+    <div id="easter-konami" class="easter-overlay" aria-hidden="true">
+      <div class="easter-konami-content">
+        <pre class="ascii-demon" aria-label="Demon ASCII art">
+    /\  /\
+   (  \/  )
+   (  ☠☠  )
+   ( ˵ ͡⊙ ͜ʖ ͡⊙ ˵)
+    \      /
+     ======
+  HAIL CRAULI
+        </pre>
+        <p>Has desbloqueado el poder oculto de Crauli.exe</p>
+        <button class="easter-close" type="button">CERRAR EL PORTAL</button>
+      </div>
+    </div>
+
+    <!-- Demon click easter egg (66 clicks) -->
+    <div id="easter-demon" class="easter-overlay" aria-hidden="true">
+      <div class="easter-demon-content">
+        <pre class="ascii-demon-big">
+     ⛧  INVOCACIÓN COMPLETA  ⛧
+
+        ╔══════════════╗
+        ║  CLICKS: 66  ║
+        ║  CRAULI HA   ║
+        ║  DESPERTADO  ║
+        ╚══════════════╝
+
+     Do what thou wilt shall be
+       the whole of the Law.
+        </pre>
+        <button class="easter-close" type="button">[ DISMISS ]</button>
+      </div>
+    </div>
+
+    <!-- No Signal idle screen -->
+    <div id="easter-nosignal" class="easter-overlay easter-nosignal" aria-hidden="true">
+      <div class="nosignal-text">NO SIGNAL</div>
+      <div class="nosignal-bars" aria-hidden="true"></div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════
+         HEADER
+    ══════════════════════════════════════════════════════ -->
+    <header id="site-header">
+
+      <!-- Pre-header status bar (retro OS style) -->
+      <div class="header-statusbar" aria-hidden="true">
+        <span>CRAULI.EXE v6.6.6</span>
+        <span id="header-time"></span><!-- filled by JS -->
+        <span>SYSTEM: OPERATIONAL</span>
+      </div>
+
+      <!-- Main title with glitch effect -->
+      <!-- data-text must match the text content for the CSS glitch pseudo-elements -->
+      <h1 class="site-title glitch" data-text="CRAULI.EXE">CRAULI.EXE</h1>
+
+      <!-- Tagline — filled from CONFIG.tagline by JS -->
+      <p id="site-tagline" class="site-tagline"></p>
+
+      <!-- Navigation -->
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="#about" class="nav-link glitch-hover">SOBRE MÍ</a>
+        <span class="nav-sep" aria-hidden="true">///</span>
+        <a href="#ruleta" class="nav-link glitch-hover">RULETA</a>
+        <span class="nav-sep" aria-hidden="true">///</span>
+        <a href="#tcg-gallery" class="nav-link glitch-hover">TCG</a>
+        <span class="nav-sep" aria-hidden="true">///</span>
+        <a href="#guestbook" class="nav-link glitch-hover">GUESTBOOK</a>
+      </nav>
+
+    </header><!-- /#site-header -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         MAIN CONTENT
+    ══════════════════════════════════════════════════════ -->
+    <main id="main-content">
+
+      <!-- ── SECTION: SOBRE MÍ ─────────────────────────────
+           Personal "About" section with edgy/dark bio
+      ──────────────────────────────────────────────────── -->
+      <section id="about" class="section">
+
+        <div class="section-header">
+          <h2 class="section-title glitch" data-text="SOBRE MÍ">SOBRE MÍ</h2>
+          <div class="section-divider" aria-hidden="true">
+            ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+          </div>
+        </div>
+
+        <div class="about-container">
+
+          <!-- ASCII sigil decoration -->
+          <div class="about-sigil" aria-hidden="true">
+            <pre>
+    ╔═══════════╗
+    ║  ⛧ 93 ⛧  ║
+    ║  DO WHAT  ║
+    ║ THOU WILT ║
+    ╚═══════════╝
+            </pre>
+          </div>
+
+          <!-- Bio content -->
+          <div class="about-text">
+
+            <p class="about-intro">
+              Bienvenido al archivo corrupto conocido como
+              <strong class="highlight-red">CRAULI</strong>.
+              Este dominio opera fuera del sistema. Sin corporativismos,
+              sin presentaciones limpias, sin LinkedIn energy.
+            </p>
+
+            <div class="about-block">
+              <h3 class="about-block-title">⚙ SISTEMA</h3>
+              <p>
+                Agente del caos digital. Entidad orgánica funcionando a base
+                de cafeína, cerveza artesanal, y la voluntad pura de
+                <em>Do what thou wilt</em>. Los sistemas fallan.
+                Los protocolos se rompen. Crauli persiste.
+              </p>
+            </div>
+
+            <div class="about-block">
+              <h3 class="about-block-title">✡ THELEMA / MAGIA</h3>
+              <p>
+                Estudiante de la Gran Obra. El universo es una ecuación
+                que nadie resolvió correctamente todavía. Crowley tenía razón
+                en algunas cosas. Los Lam tienen razón en otras.
+                El caos es el único orden real.
+              </p>
+              <p class="quote-block">
+                "Every man and every woman is a star."<br>
+                — Liber AL vel Legis
+              </p>
+            </div>
+
+            <div class="about-block">
+              <h3 class="about-block-title">🍺 CERVEZAS</h3>
+              <p>
+                Coleccionista de experiencias fermentadas. Las IPAs son
+                el camino, las Stouts son la oscuridad, y las Sours son
+                el caos en forma líquida. Si tienes una recomendación,
+                escríbela en el Guestbook.
+              </p>
+            </div>
+
+            <div class="about-block">
+              <h3 class="about-block-title">🃏 TCG</h3>
+              <p>
+                Jugador de TCG desde antes de que nadie supiera qué era
+                un TCG. Colecciones activas: Pokémon (Base Set hasta EX era),
+                One Piece (desde el Set 1), Magic: The Gathering (Vintage formats).
+                El cardboard manda.
+              </p>
+            </div>
+
+            <div class="about-block">
+              <h3 class="about-block-title">💀 FILOSOFÍA</h3>
+              <p>
+                La web debería ser rara, personal y ligeramente amenazante.
+                Odio los portfolios limpios. Odio el minimalismo obligatorio.
+                Este sitio existe como acto de resistencia contra la
+                homogeneización del internet. <strong>Geocities tenía razón.</strong>
+              </p>
+            </div>
+
+            <!-- Stats table, retro RPG style -->
+            <div class="about-stats">
+              <h3 class="about-block-title">📊 STATS</h3>
+              <table class="stats-table" aria-label="Character stats">
+                <tbody>
+                  <tr><td>CLASE</td><td>CAOS MAGO / DEV</td></tr>
+                  <tr><td>ALINEACIÓN</td><td>CAÓTICO NEUTRAL</td></tr>
+                  <tr><td>NIVEL</td><td>∞ (en progreso)</td></tr>
+                  <tr><td>HP</td><td>███████░░░ 70%</td></tr>
+                  <tr><td>MANA</td><td>██████████ 100%</td></tr>
+                  <tr><td>CERVEZA</td><td>████████░░ 80%</td></tr>
+                  <tr><td>TCG PODER</td><td>██████████ MAX</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div><!-- /.about-text -->
+
+        </div><!-- /.about-container -->
+
+      </section><!-- /#about -->
+
+
+      <!-- ── SECTION: RULETA RUSA ───────────────────────────
+           Single image, click → random URL from CONFIG.ruletaLinks
+           Managed by RuletaRusa module in main.js
+      ──────────────────────────────────────────────────── -->
+      <section id="ruleta" class="section">
+
+        <div class="section-header">
+          <h2 class="section-title glitch" data-text="RULETA RUSA">RULETA RUSA</h2>
+          <div class="section-divider" aria-hidden="true">
+            ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+          </div>
+        </div>
+
+        <div class="ruleta-container">
+          <p class="ruleta-description">
+            Haz clic en la imagen. No sabes a dónde vas.
+            Así es como Crauli navega el internet.
+          </p>
+
+          <!-- Image injected here by RuletaRusa module -->
+          <!-- The #ruleta-image-wrap div handles click + shake animation -->
+          <div id="ruleta-image-wrap" class="ruleta-image-wrap" role="button"
+               tabindex="0" aria-label="Ruleta rusa — click para destino aleatorio">
+            <div class="ruleta-crosshair" aria-hidden="true">
+              <span>+</span>
+            </div>
+            <img id="ruleta-img" src="" alt="Ruleta Rusa — destino desconocido"
+                 class="ruleta-img" loading="lazy">
+            <div class="ruleta-overlay" aria-hidden="true">
+              <span class="ruleta-label">CLICK = ??? </span>
+            </div>
+          </div>
+
+          <p class="ruleta-hint" aria-live="polite" id="ruleta-hint">
+            [ destino desconocido · haz click para descubrir ]
+          </p>
+        </div>
+
+      </section><!-- /#ruleta -->
+
+
+      <!-- ── SECTION: TCG GALLERY ───────────────────────────
+           Three horizontal carousels (pokemon / onepiece / magic)
+           Built and populated by TCGGallery module in main.js
+      ──────────────────────────────────────────────────── -->
+      <section id="tcg-gallery" class="section">
+
+        <div class="section-header">
+          <h2 class="section-title glitch" data-text="TCG COLLECTION">TCG COLLECTION</h2>
+          <div class="section-divider" aria-hidden="true">
+            ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+          </div>
+          <p class="section-subtitle">
+            [ Colección activa · Añade tus cartas en config.js ]
+          </p>
+        </div>
+
+        <!-- Gallery container — JS will inject category sub-sections here -->
+        <!-- Each sub-section structure created by TCGGallery module:
+             <div class="tcg-category">
+               <h3 class="tcg-category-title">POKEMON</h3>
+               <div class="tcg-scroll">
+                 <figure class="tcg-card">
+                   <img src="..." alt="...">
+                   <figcaption>card-name</figcaption>
+                 </figure>
+                 ...
+               </div>
+             </div>
+        -->
+        <div id="tcg-gallery-container">
+          <!-- Populated by TCGGallery.init() in main.js -->
+          <p class="gallery-loading" aria-live="polite">
+            [ Cargando colección... ]
+          </p>
+        </div>
+
+      </section><!-- /#tcg-gallery -->
+
+
+      <!-- ── SECTION: GUESTBOOK ─────────────────────────────
+           Form + rendered messages from localStorage
+           Managed by Guestbook module in main.js
+      ──────────────────────────────────────────────────── -->
+      <section id="guestbook" class="section">
+
+        <div class="section-header">
+          <h2 class="section-title glitch" data-text="GUESTBOOK">GUESTBOOK</h2>
+          <div class="section-divider" aria-hidden="true">
+            ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+          </div>
+          <p class="section-subtitle">
+            [ Deja tu marca en el registro de Crauli · powered by localStorage ]
+          </p>
+        </div>
+
+        <div class="guestbook-container">
+
+          <!-- Submission form -->
+          <form id="guestbook-form" class="guestbook-form" novalidate
+                aria-label="Formulario guestbook">
+
+            <div class="form-row">
+              <label for="gb-name" class="form-label">NOMBRE / ALIAS:</label>
+              <input type="text" id="gb-name" name="name"
+                     class="form-input" placeholder="Tu nombre o alias..."
+                     maxlength="50" autocomplete="off"
+                     aria-required="true">
+            </div>
+
+            <div class="form-row">
+              <label for="gb-message" class="form-label">MENSAJE:</label>
+              <textarea id="gb-message" name="message"
+                        class="form-textarea"
+                        placeholder="Escribe tu mensaje... (max 500 chars)"
+                        maxlength="500" rows="4"
+                        aria-required="true"></textarea>
+            </div>
+
+            <div class="form-row form-actions">
+              <button type="submit" class="form-submit glitch-hover">
+                [ ENVIAR AL ABISMO ]
+              </button>
+              <span id="form-feedback" class="form-feedback" aria-live="polite"></span>
+            </div>
+
+          </form><!-- /#guestbook-form -->
+
+          <!-- Messages list — populated by Guestbook.renderMessages() -->
+          <div id="guestbook-messages" class="guestbook-messages"
+               aria-label="Mensajes del guestbook" aria-live="polite">
+            <!-- Messages injected here by JS -->
+            <!-- Each message structure:
+                 <article class="gb-post">
+                   <header class="gb-post-header">
+                     <span class="gb-author">NAME</span>
+                     <time class="gb-time">TIMESTAMP</time>
+                   </header>
+                   <p class="gb-body">MESSAGE</p>
+                 </article>
+            -->
+          </div>
+
+        </div><!-- /.guestbook-container -->
+
+      </section><!-- /#guestbook -->
+
+    </main><!-- /#main-content -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         FOOTER
+    ══════════════════════════════════════════════════════ -->
+    <footer id="site-footer">
+      <div class="footer-ascii" aria-hidden="true">
+        ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+      </div>
+      <div class="footer-content">
+        <p class="footer-copy">
+          © MMXXVI CRAULI.EXE · Todos los derechos pertenecen al caos
+        </p>
+        <p class="footer-tech">
+          BUILT WITH: HATE · VANILLA JS · CERVEZA · BLACK MAGIC
+        </p>
+        <p class="footer-secret" aria-hidden="true">
+          <!-- easter egg hint hidden in very small text -->
+          <span title="↑↑↓↓←→←→BA">·</span>
+        </p>
+      </div>
+      <div class="footer-ascii" aria-hidden="true">
+        ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+      </div>
+    </footer><!-- /#site-footer -->
+
+  </div><!-- /#main-site -->
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCRIPTS — loaded at bottom of body for performance
+       Load order matters: config.js must come before main.js
+  ══════════════════════════════════════════════════════════ -->
+  <script src="config.js"></script>
+  <script src="main.js"></script>
+
+</body>
+</html>
