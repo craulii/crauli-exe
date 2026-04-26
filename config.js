@@ -21,7 +21,7 @@ const CONFIG = {
    * Clicking any floating photo redirects here.
    * @type {string}
    */
-  linkedinURL: "https://www.linkedin.com/in/joseramoncrauli",
+  linkedinURL: "https://www.linkedin.com/in/jos%C3%A9-ram%C3%B3n-vega-cumsille-a7b45b333/",
 
   /**
    * List of URLs for the "Ruleta Rusa" (Russian Roulette) image.
@@ -102,18 +102,24 @@ const CONFIG = {
    */
   tcgImages: {
     pokemon: [
-      "charizard-holo.jpg",
-      "mewtwo-base.jpg",
-      "pikachu-promo.jpg"
+      "absol.jpeg",
+      "absol_mega.jpeg",
+      "absol_megaex.jpeg"
     ],
     onepiece: [
-      "luffy-gear5.jpg",
-      "zoro-alt-art.jpg"
+      "brook_op15.jpeg",
+      "carrot_eb3.jpeg",
+      "carrot_eb4.jpeg",
+      "carrot_leader.jpeg",
+      "carrot_sp.jpeg",
+      "carrot_sr.jpeg",
+      "shanks_op9_aa.jpeg"
     ],
     magic: [
-      "black-lotus.jpg",
-      "underground-sea.jpg",
-      "ancestral-recall.jpg"
+      "frog_tongue.jpeg",
+      "orchish_lumberjack.jpeg",
+      "shivan_dragon.jpeg",
+      "sol_ring.jpeg"
     ]
   },
 
