@@ -144,6 +144,23 @@ const CONFIG = {
   audioVolume: 0.3,
 
   // ----------------------------------------------------------
+  // SUPABASE — guestbook backend
+  // Get these from: supabase.com → your project → Settings → API
+  // ----------------------------------------------------------
+
+  /**
+   * Your Supabase project URL (looks like https://xxxx.supabase.co)
+   * @type {string}
+   */
+  supabaseUrl: "REPLACE_WITH_YOUR_SUPABASE_URL",
+
+  /**
+   * Your Supabase anon/public key (safe to expose in frontend)
+   * @type {string}
+   */
+  supabaseAnonKey: "REPLACE_WITH_YOUR_ANON_KEY",
+
+  // ----------------------------------------------------------
   // SITE IDENTITY
   // ----------------------------------------------------------
 

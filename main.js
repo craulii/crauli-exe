@@ -561,108 +561,131 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ============================================================
   // MODULE 7: GUESTBOOK
-  // Stores messages in localStorage as a JSON array.
-  // Key: 'crauli_guestbook'
-  // Each message: { name: string, text: string, timestamp: string }
+  // Uses Supabase REST API (no SDK — plain fetch).
+  // Table: guestbook (id, name, message, created_at)
+  // Falls back to localStorage if Supabase is not configured.
+  //
+  // To configure: set supabaseUrl + supabaseAnonKey in config.js
+  // To create the table: run the SQL in supabase.com SQL editor:
+  //   CREATE TABLE guestbook (
+  //     id bigserial primary key,
+  //     name text not null check(char_length(name) <= 50),
+  //     message text not null check(char_length(message) <= 500),
+  //     created_at timestamptz default now()
+  //   );
+  //   ALTER TABLE guestbook ENABLE ROW LEVEL SECURITY;
+  //   CREATE POLICY "read all" ON guestbook FOR SELECT USING (true);
+  //   CREATE POLICY "insert all" ON guestbook FOR INSERT WITH CHECK (true);
   // ============================================================
   const Guestbook = (() => {
 
-    const STORAGE_KEY  = 'crauli_guestbook';
     const form         = document.getElementById('guestbook-form');
     const nameInput    = document.getElementById('gb-name');
     const messageInput = document.getElementById('gb-message');
     const messagesEl   = document.getElementById('guestbook-messages');
     const feedbackEl   = document.getElementById('form-feedback');
 
-    // Max messages stored (oldest are dropped to prevent bloat)
-    const MAX_MESSAGES = 100;
+    // Detect whether Supabase is configured
+    const USE_SUPABASE = (
+      CONFIG.supabaseUrl &&
+      CONFIG.supabaseUrl !== 'REPLACE_WITH_YOUR_SUPABASE_URL' &&
+      CONFIG.supabaseAnonKey &&
+      CONFIG.supabaseAnonKey !== 'REPLACE_WITH_YOUR_ANON_KEY'
+    );
 
-    function _loadMessages() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      } catch {
-        return [];
+    const SB_HEADERS = USE_SUPABASE ? {
+      'apikey':        CONFIG.supabaseAnonKey,
+      'Authorization': `Bearer ${CONFIG.supabaseAnonKey}`,
+      'Content-Type':  'application/json',
+    } : {};
+
+    // ── Supabase helpers ──────────────────────────────────────
+
+    async function _sbFetchMessages() {
+      const res = await fetch(
+        `${CONFIG.supabaseUrl}/rest/v1/guestbook?select=*&order=created_at.desc&limit=100`,
+        { headers: SB_HEADERS }
+      );
+      if (!res.ok) throw new Error(`Supabase read error: ${res.status}`);
+      return res.json(); // array of { id, name, message, created_at }
+    }
+
+    async function _sbInsert(name, message) {
+      const res = await fetch(
+        `${CONFIG.supabaseUrl}/rest/v1/guestbook`,
+        {
+          method:  'POST',
+          headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' },
+          body:    JSON.stringify({ name, message }),
+        }
+      );
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`Supabase insert error: ${res.status} ${err}`);
       }
     }
 
-    function _saveMessages(messages) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    // ── localStorage fallback ─────────────────────────────────
+
+    const LS_KEY = 'crauli_guestbook';
+
+    function _lsLoad() {
+      try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
+      catch { return []; }
     }
 
-    function _addMessage(name, text) {
-      const messages = _loadMessages();
-      messages.unshift({
-        name:      _sanitize(name.trim()),
-        text:      _sanitize(text.trim()),
-        timestamp: new Date().toISOString(),
-      });
-      // Keep only the most recent MAX_MESSAGES entries
-      _saveMessages(messages.slice(0, MAX_MESSAGES));
+    function _lsSave(msgs) {
+      localStorage.setItem(LS_KEY, JSON.stringify(msgs.slice(0, 100)));
     }
 
-    // Basic sanitization: escape HTML special chars to prevent XSS
-    // since these strings are later set as textContent (not innerHTML),
-    // this is a defense-in-depth measure only
-    function _sanitize(str) {
-      return str
-        .replace(/&/g,  '&amp;')
-        .replace(/</g,  '&lt;')
-        .replace(/>/g,  '&gt;')
-        .replace(/"/g,  '&quot;')
-        .replace(/'/g,  '&#x27;');
+    function _lsInsert(name, message) {
+      const msgs = _lsLoad();
+      msgs.unshift({ name, message, created_at: new Date().toISOString() });
+      _lsSave(msgs);
     }
+
+    // ── Shared rendering ─────────────────────────────────────
 
     function _formatDate(isoString) {
       try {
-        const d = new Date(isoString);
-        // Format: DD/MM/YYYY HH:MM
-        return d.toLocaleDateString('es-CL', {
-          day:   '2-digit',
-          month: '2-digit',
-          year:  'numeric',
-          hour:  '2-digit',
-          minute: '2-digit',
+        return new Date(isoString).toLocaleDateString('es-CL', {
+          day: '2-digit', month: '2-digit', year: 'numeric',
+          hour: '2-digit', minute: '2-digit',
         });
-      } catch {
-        return isoString;
-      }
+      } catch { return isoString; }
     }
 
-    function renderMessages() {
+    function _renderList(messages) {
       if (!messagesEl) return;
+      messagesEl.innerHTML = '';
 
-      const messages = _loadMessages();
-
-      if (messages.length === 0) {
+      if (!messages.length) {
         messagesEl.innerHTML = '<p class="gb-empty">[ Sin mensajes aún — sé el primero en escribir ]</p>';
         return;
       }
 
-      // Build HTML using textContent to prevent XSS
-      messagesEl.innerHTML = '';
-
       messages.forEach(msg => {
-        const article = document.createElement('article');
+        const article  = document.createElement('article');
         article.classList.add('gb-post');
 
-        const header = document.createElement('header');
+        const header   = document.createElement('header');
         header.classList.add('gb-post-header');
 
         const authorEl = document.createElement('span');
         authorEl.classList.add('gb-author');
-        authorEl.textContent = msg.name; // textContent, not innerHTML — XSS safe
+        authorEl.textContent = msg.name;
 
-        const timeEl = document.createElement('time');
+        const timeEl   = document.createElement('time');
         timeEl.classList.add('gb-time');
-        timeEl.setAttribute('datetime', msg.timestamp);
-        timeEl.textContent = _formatDate(msg.timestamp);
+        timeEl.setAttribute('datetime', msg.created_at);
+        timeEl.textContent = _formatDate(msg.created_at);
 
         header.appendChild(authorEl);
         header.appendChild(timeEl);
 
         const bodyEl = document.createElement('p');
         bodyEl.classList.add('gb-body');
-        bodyEl.textContent = msg.text; // textContent — XSS safe
+        bodyEl.textContent = msg.message;
 
         article.appendChild(header);
         article.appendChild(bodyEl);
@@ -670,64 +693,68 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    async function _loadAndRender() {
+      if (!messagesEl) return;
+      messagesEl.innerHTML = '<p class="gb-empty">[ Cargando mensajes... ]</p>';
+      try {
+        const msgs = USE_SUPABASE ? await _sbFetchMessages() : _lsLoad();
+        _renderList(msgs);
+      } catch (e) {
+        console.error('[Guestbook] Load failed:', e);
+        messagesEl.innerHTML = '<p class="gb-empty">[ Error cargando mensajes ]</p>';
+      }
+    }
+
     function _setFeedback(msg, isError = false) {
       if (!feedbackEl) return;
       feedbackEl.textContent = msg;
       feedbackEl.classList.toggle('is-error', isError);
-      // Clear feedback after 3 seconds
       setTimeout(() => {
         feedbackEl.textContent = '';
         feedbackEl.classList.remove('is-error');
       }, 3000);
     }
 
-    function _handleSubmit(e) {
+    async function _handleSubmit(e) {
       e.preventDefault();
 
-      const name = nameInput?.value?.trim() || '';
-      const text = messageInput?.value?.trim() || '';
+      const name    = nameInput?.value?.trim()    || '';
+      const message = messageInput?.value?.trim() || '';
 
-      // Validation
-      if (!name) {
-        _setFeedback('[ ERROR: Nombre requerido ]', true);
-        nameInput?.focus();
-        return;
-      }
-      if (!text) {
-        _setFeedback('[ ERROR: Mensaje requerido ]', true);
-        messageInput?.focus();
-        return;
-      }
-      if (name.length > 50) {
-        _setFeedback('[ ERROR: Nombre demasiado largo (máx 50) ]', true);
-        return;
-      }
-      if (text.length > 500) {
-        _setFeedback('[ ERROR: Mensaje demasiado largo (máx 500) ]', true);
-        return;
-      }
+      if (!name)            { _setFeedback('[ ERROR: Nombre requerido ]', true); nameInput?.focus(); return; }
+      if (!message)         { _setFeedback('[ ERROR: Mensaje requerido ]', true); messageInput?.focus(); return; }
+      if (name.length > 50) { _setFeedback('[ ERROR: Nombre demasiado largo (máx 50) ]', true); return; }
+      if (message.length > 500) { _setFeedback('[ ERROR: Mensaje muy largo (máx 500) ]', true); return; }
 
-      // Save and re-render
-      _addMessage(name, text);
-      renderMessages();
-      form.reset();
-      _setFeedback('[ MENSAJE ENVIADO AL ABISMO ✓ ]');
+      // Disable form while saving
+      const submitBtn = form.querySelector('.form-submit');
+      if (submitBtn) submitBtn.disabled = true;
+      _setFeedback('[ Enviando... ]');
 
-      // Scroll to messages
-      if (messagesEl) {
-        messagesEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      try {
+        if (USE_SUPABASE) {
+          await _sbInsert(name, message);
+        } else {
+          _lsInsert(name, message);
+        }
+        form.reset();
+        _setFeedback('[ MENSAJE ENVIADO AL ABISMO ✓ ]');
+        await _loadAndRender();
+        messagesEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        console.error('[Guestbook] Submit failed:', err);
+        _setFeedback('[ ERROR al enviar — intenta de nuevo ]', true);
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
       }
     }
 
     function init() {
-      renderMessages();
-
-      if (form) {
-        form.addEventListener('submit', _handleSubmit);
-      }
+      _loadAndRender();
+      form?.addEventListener('submit', _handleSubmit);
     }
 
-    return { init, renderMessages };
+    return { init };
   })();
 
 
