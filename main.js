@@ -137,34 +137,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ============================================================
   // MODULE 3: AUDIO CONTROL
-  // Creates an <audio> element and wires the toggle button.
-  // Browser autoplay policy requires a user gesture — we set
-  // playOnInteraction flag and attempt play on entry button click.
+  // Rotates through CONFIG.audioPaths in order, looping back to
+  // track 0 after the last one ends. Shows current track name.
   // ============================================================
   const AudioControl = (() => {
 
-    const toggleBtn  = document.getElementById('audio-toggle');
-    const statusEl   = document.getElementById('audio-status');
-    const iconEl     = document.getElementById('audio-icon');
-    let   audio      = null;
-    let   isPlaying  = false;
+    const toggleBtn = document.getElementById('audio-toggle');
+    const statusEl  = document.getElementById('audio-status');
+    const iconEl    = document.getElementById('audio-icon');
 
-    function _createAudio() {
-      audio = new Audio(CONFIG.audioPath);
-      audio.loop   = true;
-      audio.volume = CONFIG.audioVolume;
+    let audio        = null;
+    let isPlaying    = false;
+    let trackIndex   = 0;
+    const playlist   = CONFIG.audioPaths || [];
 
-      // Handle missing audio file gracefully
-      audio.addEventListener('error', () => {
-        console.warn('[AudioControl] Audio file not found at:', CONFIG.audioPath);
-        if (toggleBtn) toggleBtn.title = 'Audio file not found — add MP3 to /assets/audio/';
-      });
+    function _trackName(path) {
+      // Extract filename without extension for display
+      return path.split('/').pop().replace(/\.[^.]+$/, '');
+    }
+
+    function _loadTrack(index) {
+      if (!playlist.length) return;
+      trackIndex = index % playlist.length;
+
+      if (!audio) {
+        audio = new Audio();
+        audio.volume = CONFIG.audioVolume;
+        // When a track ends, advance to the next one automatically
+        audio.addEventListener('ended', () => _loadAndPlay((trackIndex + 1) % playlist.length));
+        audio.addEventListener('error', () => {
+          console.warn('[AudioControl] Could not load:', playlist[trackIndex]);
+          // Skip broken track, try next
+          _loadAndPlay((trackIndex + 1) % playlist.length);
+        });
+      }
+
+      audio.src = playlist[trackIndex];
+      audio.load();
+      _updateTrackUI();
+    }
+
+    function _loadAndPlay(index) {
+      _loadTrack(index);
+      audio.play()
+        .then(() => _updateUI(true))
+        .catch(() => _updateUI(false));
+    }
+
+    function _updateTrackUI() {
+      if (!toggleBtn || !playlist.length) return;
+      const name = _trackName(playlist[trackIndex]);
+      toggleBtn.title = `♪ ${name}`;
     }
 
     function _updateUI(playing) {
       isPlaying = playing;
       if (!statusEl || !iconEl) return;
-
       if (playing) {
         statusEl.textContent = 'ON';
         statusEl.classList.add('is-on');
@@ -177,8 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function toggle() {
-      if (!audio) _createAudio();
-
+      if (!audio) _loadTrack(0);
       if (isPlaying) {
         audio.pause();
         _updateUI(false);
@@ -189,24 +216,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Called by EntryScreen after the user gesture (button click)
     function tryAutoplay() {
-      if (!audio) _createAudio();
+      _loadTrack(0);
       audio.play()
         .then(() => _updateUI(true))
-        .catch(() => {
-          // Autoplay blocked — user can click the toggle manually
-          _updateUI(false);
-        });
+        .catch(() => _updateUI(false));
     }
 
     function init() {
-      _createAudio();
+      if (playlist.length) _loadTrack(0);
       _updateUI(false);
-
-      if (toggleBtn) {
-        toggleBtn.addEventListener('click', toggle);
-      }
+      if (toggleBtn) toggleBtn.addEventListener('click', toggle);
     }
 
     return { init, tryAutoplay, toggle };

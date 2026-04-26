@@ -122,15 +122,19 @@ const CONFIG = {
   // ----------------------------------------------------------
 
   /**
-   * Path to the background music file (relative to index.html).
-   * Drop your .mp3 (or .ogg/.wav) in /assets/audio/ and update this.
-   * @type {string}
+   * Playlist — array of audio files in /assets/audio/
+   * They play in order and loop back to the first when the last ends.
+   * Add more tracks by adding filenames here.
+   * @type {string[]}
    */
-  audioPath: "./assets/audio/background.mp3",
+  audioPaths: [
+    "./assets/audio/Lodi Dodi.mp3",
+    "./assets/audio/Three 6 Mafia - Stay Fly.mp3",
+    "./assets/audio/yeat - out the way ( slowed  reverb ).mp3"
+  ],
 
   /**
    * Initial volume — 0.0 (silent) to 1.0 (full blast).
-   * 0.3 = 30% volume, recommended to not jumpscare visitors.
    * @type {number}
    */
   audioVolume: 0.3,
