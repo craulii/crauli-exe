@@ -30,14 +30,12 @@ const CONFIG = {
    * @type {string[]}
    */
   ruletaLinks: [
-    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    "https://www.youtube.com/watch?v=oHg5SJYRHA0",
-    "https://www.twitch.tv/",
-    "https://archive.org/",
-    "https://www.youtube.com/watch?v=ZZ5LpwO-An4",
-    "https://cursedimages.tumblr.com/",
-    "https://en.wikipedia.org/wiki/Thelema",
-    "https://www.threesixmafia.com/"
+    "https://rule34.xxx/index.php?page=post&s=list&tags=carrot_%28one_piece%29",
+    "https://rule34.xxx/index.php?page=post&s=list&tags=yordle",
+    "https://rule34.xxx/index.php?page=post&s=list&tags=judy_hopps",
+    "https://craulitieneunchingodeferia.lat/",
+    "https://viper.to/threads/7346376-JAV-Magazines-(Vintage-and-New)/?page=7",
+    "https://onepiecetopdecks.com/deck-list/japan-op-13-deck-list-carrying-on-his-will/deckgen/?dn=Red%20Black%20Sabo&date=9/7/2025&cn=JP&au=HiZooted&pl=1st%20Place&tn=StorePrelims(4-0)&hs=Hobbies%20Store&dg=1nOP13-004a2nOP05-015a3nOP13-016a2nOP07-015a1nOP09-118a4nOP12-086a4nOP12-089a4nOP12-093a1nOP04-083a2nOP13-081a4nPRB02-014a2nOP13-090a4nOP13-120a4nOP12-094a3nOP07-085a4nOP05-021a3nOP12-097a3nOP12-098&cs=250"
   ],
 
   // ----------------------------------------------------------
