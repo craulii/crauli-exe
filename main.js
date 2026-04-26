@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         HeaderClock.init();
         GlitchEffects.init();
         EasterEggs.init();
+        PhotoGallery.init();
 
       }, 500); // must match transition duration in CSS
     }
@@ -917,6 +918,119 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         _resetIdleTimer(); // start initial timer
       }
+    }
+
+    return { init };
+  })();
+
+
+  // ============================================================
+  // MODULE 11: PHOTO GALLERY
+  // Builds a grid from CONFIG.galleryPhotos.
+  // Click on any photo → opens lightbox with prev/next navigation.
+  // ============================================================
+  const PhotoGallery = (() => {
+
+    const gridEl     = document.getElementById('photo-gallery-grid');
+    const lightbox   = document.getElementById('photo-lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const closeBtn   = document.getElementById('lightbox-close');
+    const prevBtn    = document.getElementById('lightbox-prev');
+    const nextBtn    = document.getElementById('lightbox-next');
+    const counterEl  = document.getElementById('lightbox-counter');
+
+    let currentIndex = 0;
+    let photos       = [];
+
+    function _open(index) {
+      currentIndex = index;
+      const src = `./assets/me/${photos[currentIndex]}`;
+      lightboxImg.src = src;
+      lightboxImg.alt = `Foto ${currentIndex + 1} de ${photos.length}`;
+      if (counterEl) counterEl.textContent = `${currentIndex + 1} / ${photos.length}`;
+      lightbox.classList.add('is-open');
+      lightbox.removeAttribute('aria-hidden');
+      closeBtn?.focus();
+    }
+
+    function _close() {
+      lightbox.classList.remove('is-open');
+      lightbox.setAttribute('aria-hidden', 'true');
+    }
+
+    function _prev() {
+      currentIndex = (currentIndex - 1 + photos.length) % photos.length;
+      _open(currentIndex);
+    }
+
+    function _next() {
+      currentIndex = (currentIndex + 1) % photos.length;
+      _open(currentIndex);
+    }
+
+    function init() {
+      if (!gridEl || !CONFIG.galleryPhotos || CONFIG.galleryPhotos.length === 0) return;
+
+      photos = CONFIG.galleryPhotos;
+      gridEl.innerHTML = '';
+
+      photos.forEach((filename, i) => {
+        const cell = document.createElement('div');
+        cell.classList.add('photo-cell');
+        cell.setAttribute('role', 'button');
+        cell.setAttribute('tabindex', '0');
+        cell.setAttribute('aria-label', `Foto ${i + 1} — click para ampliar`);
+        // Slight random tilt for cursed feel
+        const tilt = (Math.random() * 2 - 1).toFixed(2);
+        cell.style.transform = `rotate(${tilt}deg)`;
+
+        const img = document.createElement('img');
+        img.src     = `./assets/me/${filename}`;
+        img.alt     = `Foto personal ${i + 1}`;
+        img.loading = 'lazy';
+        img.addEventListener('error', () => {
+          cell.style.background = 'rgba(192,57,43,0.1)';
+          cell.style.display = 'flex';
+          cell.style.alignItems = 'center';
+          cell.style.justifyContent = 'center';
+          img.style.display = 'none';
+        });
+
+        const overlay = document.createElement('div');
+        overlay.classList.add('photo-cell-overlay');
+        overlay.setAttribute('aria-hidden', 'true');
+        const num = document.createElement('span');
+        num.classList.add('photo-cell-num');
+        num.textContent = String(i + 1).padStart(2, '0');
+        overlay.appendChild(num);
+
+        cell.appendChild(img);
+        cell.appendChild(overlay);
+        gridEl.appendChild(cell);
+
+        cell.addEventListener('click', () => _open(i));
+        cell.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); _open(i); }
+        });
+      });
+
+      // Lightbox controls
+      closeBtn?.addEventListener('click', _close);
+      prevBtn?.addEventListener('click', _prev);
+      nextBtn?.addEventListener('click', _next);
+
+      // Click outside image closes lightbox
+      lightbox?.addEventListener('click', (e) => {
+        if (e.target === lightbox) _close();
+      });
+
+      // Keyboard navigation inside lightbox
+      document.addEventListener('keydown', (e) => {
+        if (!lightbox?.classList.contains('is-open')) return;
+        if (e.key === 'Escape')      _close();
+        if (e.key === 'ArrowLeft')   _prev();
+        if (e.key === 'ArrowRight')  _next();
+      });
     }
 
     return { init };

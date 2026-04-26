@@ -49,7 +49,7 @@ const CONFIG = {
    * Path is relative to index.html.
    * @type {string}
    */
-  ruletaImage: "./assets/me/ruleta.jpg",
+  ruletaImage: "./assets/me/ruleta.jpeg",
 
   /**
    * List of image FILENAMES (not full paths) inside /assets/me/
@@ -60,10 +60,31 @@ const CONFIG = {
    * Example: ["photo1.jpg", "photo2.png", "selfie.webp"]
    * @type {string[]}
    */
+  // 5 random picks from the full set — change these if quieres otras
   floatingPhotos: [
-    "photo1.jpg",
-    "photo2.jpg",
-    "photo3.jpg"
+    "foto4.jpeg",
+    "foto11.jpeg",
+    "foto19.jpeg",
+    "foto29.jpeg",
+    "foto38.jpeg"
+  ],
+
+  /**
+   * All photos shown in the personal gallery section (#photo-gallery).
+   * These appear in a grid below the TCG section.
+   * To add/remove: edit this array. Filename = file in /assets/me/
+   * @type {string[]}
+   */
+  galleryPhotos: [
+    "foto1.jpeg","foto2.jpeg","foto3.jpeg","foto4.jpeg","foto5.jpeg",
+    "foto6.jpeg","foto7.jpeg","foto8.jpeg","foto9.jpeg","foto10.jpeg",
+    "foto11.jpeg","foto12.jpeg","foto13.jpeg","foto14.jpeg","foto15.jpeg",
+    "foto16.jpeg","foto17.jpeg","foto18.jpeg","foto19.jpeg","foto20.jpeg",
+    "foto21.jpeg","foto22.jpeg","foto23.jpeg","foto24.jpeg","foto25.jpeg",
+    "foto26.jpeg","foto27.jpeg","foto28.jpeg","foto29.jpeg","foto30.jpeg",
+    "foto31.jpeg","foto32.jpeg","foto33.jpeg","foto34.jpeg","foto35.jpeg",
+    "foto36.jpeg","foto37.jpeg","foto38.jpeg","foto39.jpeg","foto40.jpeg",
+    "foto41.jpeg","foto42.jpeg","foto43.jpeg","foto44.jpeg","foto45.jpeg"
   ],
 
   /**
@@ -123,13 +144,13 @@ const CONFIG = {
    * Keep it threatening.
    * @type {string}
    */
-  warningText: "⚠ ADVERTENCIA ⚠\nEste sitio contiene contenido perturbador,\nmagia oscura, TCG de élite y energía caótica.\nProcede bajo tu propio riesgo.",
+  warningText: "⚠ ADVERTENCIA ⚠\nEstás entrando a craulitieneunchingodeferia.\nContenido perturbador, magia oscura, TCG de élite y energía caótica.\nProcede bajo tu propio riesgo.",
 
   /**
    * Site tagline shown in the header under the main title.
    * @type {string}
    */
-  tagline: "[ AGENTE DEL CAOS DIGITAL · THELEMA · CERVEZA · TCG ]",
+  tagline: "[ craulitieneunchingodeferia · THELEMA · CERVEZA · TCG ]",
 
   // ----------------------------------------------------------
   // EASTER EGGS

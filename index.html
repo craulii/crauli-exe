@@ -27,10 +27,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Crauli.exe — Agente del caos digital. Thelema, magia oscura, TCG y cervezas.">
+  <meta name="description" content="craulitieneunchingodeferia — Agente del caos digital. Thelema, magia oscura, TCG y cervezas.">
   <meta name="robots" content="noindex"> <!-- keep this cursed domain underground -->
 
-  <title>CRAULI.EXE — ENTER IF YOU DARE</title>
+  <title>craulitieneunchingodeferia — ENTER IF YOU DARE</title>
 
   <!-- Pixel/horror fonts from Google Fonts CDN -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,7 +68,7 @@
       <div class="entry-skull" aria-hidden="true">☠</div>
 
       <!-- Warning title — ID used by aria-labelledby -->
-      <h1 id="entry-title" class="entry-title glitch" data-text="CRAULI.EXE">CRAULI.EXE</h1>
+      <h1 id="entry-title" class="entry-title glitch" data-text="craulitieneunchingodeferia">craulitieneunchingodeferia</h1>
 
       <!-- Warning body text — filled from CONFIG.warningText by JS -->
       <div id="entry-warning-text" class="entry-warning"></div>
@@ -147,7 +147,7 @@
      ======
   HAIL CRAULI
         </pre>
-        <p>Has desbloqueado el poder oculto de Crauli.exe</p>
+        <p>Has desbloqueado el poder oculto de craulitieneunchingodeferia</p>
         <button class="easter-close" type="button">CERRAR EL PORTAL</button>
       </div>
     </div>
@@ -185,14 +185,14 @@
 
       <!-- Pre-header status bar (retro OS style) -->
       <div class="header-statusbar" aria-hidden="true">
-        <span>CRAULI.EXE v6.6.6</span>
+        <span>craulitieneunchingodeferia v6.6.6</span>
         <span id="header-time"></span><!-- filled by JS -->
         <span>SYSTEM: OPERATIONAL</span>
       </div>
 
       <!-- Main title with glitch effect -->
       <!-- data-text must match the text content for the CSS glitch pseudo-elements -->
-      <h1 class="site-title glitch" data-text="CRAULI.EXE">CRAULI.EXE</h1>
+      <h1 class="site-title glitch" data-text="crauli">crauli</h1>
 
       <!-- Tagline — filled from CONFIG.tagline by JS -->
       <p id="site-tagline" class="site-tagline"></p>
@@ -204,6 +204,8 @@
         <a href="#ruleta" class="nav-link glitch-hover">RULETA</a>
         <span class="nav-sep" aria-hidden="true">///</span>
         <a href="#tcg-gallery" class="nav-link glitch-hover">TCG</a>
+        <span class="nav-sep" aria-hidden="true">///</span>
+        <a href="#photo-gallery" class="nav-link glitch-hover">FOTOS</a>
         <span class="nav-sep" aria-hidden="true">///</span>
         <a href="#guestbook" class="nav-link glitch-hover">GUESTBOOK</a>
       </nav>
@@ -408,6 +410,40 @@
       </section><!-- /#tcg-gallery -->
 
 
+      <!-- ── SECTION: PHOTO GALLERY ───────────────────────────
+           Grid of all personal photos from CONFIG.galleryPhotos
+           Built by PhotoGallery module in main.js
+           Click on a photo → opens lightbox overlay
+      ──────────────────────────────────────────────────── -->
+      <section id="photo-gallery" class="section">
+
+        <div class="section-header">
+          <h2 class="section-title glitch" data-text="ARCHIVO PERSONAL">ARCHIVO PERSONAL</h2>
+          <div class="section-divider" aria-hidden="true">
+            ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+          </div>
+          <p class="section-subtitle">[ Registro visual de Crauli · click para ampliar ]</p>
+        </div>
+
+        <!-- Grid container — populated by PhotoGallery.init() in main.js -->
+        <div id="photo-gallery-grid" class="photo-gallery-grid" aria-label="Galería de fotos personales">
+          <p class="gallery-loading" aria-live="polite">[ Cargando archivo... ]</p>
+        </div>
+
+      </section><!-- /#photo-gallery -->
+
+      <!-- Lightbox overlay — revealed by PhotoGallery on image click -->
+      <div id="photo-lightbox" class="photo-lightbox" aria-modal="true" aria-hidden="true" role="dialog">
+        <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Cerrar">✕</button>
+        <button id="lightbox-prev" class="lightbox-nav lightbox-prev" type="button" aria-label="Anterior">◀</button>
+        <div class="lightbox-img-wrap">
+          <img id="lightbox-img" src="" alt="" class="lightbox-img">
+        </div>
+        <button id="lightbox-next" class="lightbox-nav lightbox-next" type="button" aria-label="Siguiente">▶</button>
+        <div id="lightbox-counter" class="lightbox-counter"></div>
+      </div>
+
+
       <!-- ── SECTION: GUESTBOOK ─────────────────────────────
            Form + rendered messages from localStorage
            Managed by Guestbook module in main.js
@@ -487,7 +523,7 @@
       </div>
       <div class="footer-content">
         <p class="footer-copy">
-          © MMXXVI CRAULI.EXE · Todos los derechos pertenecen al caos
+          © MMXXVI craulitieneunchingodeferia · Todos los derechos pertenecen al caos
         </p>
         <p class="footer-tech">
           BUILT WITH: HATE · VANILLA JS · CERVEZA · BLACK MAGIC
